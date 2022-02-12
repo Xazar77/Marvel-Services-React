@@ -1,43 +1,33 @@
+import {useHttp} from '../hooks/http.hook'
 
 
+const useMarvelService = () => {
 
-class MarvelService {
-    _apiBase = 'https://gateway.marvel.com:443/v1/public/'
-    _apiKey = 'apikey=2b41a4868fc7f6cacdf31c2bd6d5e245'
-    _baseOffset = 210
-    getResoursce = async (url) => {
-        let res = await fetch(url)
+    const { loading, request, error, clearError } = useHttp()
+    
+    const _apiBase = 'https://gateway.marvel.com:443/v1/public/'
+    const _apiKey = 'apikey=2b41a4868fc7f6cacdf31c2bd6d5e245'
+    const _baseOffset = 210
+ 
 
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status ${res.status}`)
-            
-        }
-        return await res.json()
-    }
-
-    getAllCharacters = async(offset = this._baseOffset) => {
-        const res = await this.getResoursce(`${this._apiBase}characters?limit=9&offset=${offset}&${this._apiKey}`)
-        return res.data.results.map(this._transformCharacter)
+    const getAllCharacters = async(offset = _baseOffset) => {
+        const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`)
+        return res.data.results.map(_transformCharacter)
     
     }
 
-    getCharacter = async (id) => {
-        const res = await this.getResoursce(`${this._apiBase}characters/${id}?${this._apiKey}`)
-        // return this._transformCharacter(res)  //  1 Вариант
-        return this._transformCharacter(res.data.results[0])  // 2 ВАРИАНТ
+    const getCharacter = async (id) => {
+        // const res = await request(`https://gateway.marvel.com:443/v1/public/characters/${id}?apikey=2b41a4868fc7f6cacdf31c2bd6d5e245`)
+        const res = await request(`${_apiBase}characters/${id}?${_apiKey}`)
+        return _transformCharacter(res.data.results[0])  
     }
 
-    // _transformCharacter = (res) => {    //  1 Вариант
-    _transformCharacter = (char) => {     // 2 ВАРИАНТ
+    const _transformCharacter = (char) => {     
         return {
-            // name: res.data.results[0].name,                           //  1 Вариант
-            // description: res.data.results[0].description,
-            // thumbnail:  res.data.results[0].thumbnail.path + '.' + res.data.results[0].thumbnail.extension,
-            // homepage:  res.data.results[0].urls[0].url,
-            // wiki: res.data.results[0].urls[1].url
+           
 
             id: char.id,
-            name: char.name,                            // 2 ВАРИАНТ
+            name: char.name,                           
             description: char.description,
             thumbnail:  char.thumbnail.path + '.' + char.thumbnail.extension,
             homepage:  char.urls[0].url,
@@ -46,5 +36,6 @@ class MarvelService {
 
         }
     }
+    return {loading, error, getAllCharacters, getCharacter, clearError}
 }
-export default MarvelService
+export default useMarvelService

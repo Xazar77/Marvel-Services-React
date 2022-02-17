@@ -1,15 +1,33 @@
 import {useHttp} from '../hooks/http.hook';
 
 const useMarvelService = () => {
-    const {loading, request, error, clearError} = useHttp();
+    // loading, error - больше не используются
+    const {request, clearError, process, setProcess} = useHttp();
 
     const _apiBase = 'https://gateway.marvel.com:443/v1/public/';
     // ЗДЕСЬ БУДЕТ ВАШ КЛЮЧ, ЭТОТ КЛЮЧ МОЖЕТ НЕ РАБОТАТЬ
     const _apiKey = 'apikey=c5d6fc8b83116d92ed468ce36bac6c62';
     const _baseOffset = 210;
 
+
+
     const getAllCharacters = async (offset = _baseOffset) => {
         const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`);
+        return res.data.results.map(_transformCharacter);
+    }
+
+    // Вариант модификации готового метода для поиска по имени. 
+    // Вызывать его можно вот так: getAllCharacters(null, name)
+
+    // const getAllCharacters = async (offset = _baseOffset, name = '') => {
+    //     const res = await request(`${_apiBase}characters?limit=9&offset=${offset}${name ? `&name=${name}` : '' }&${_apiKey}`);
+    //     return res.data.results.map(_transformCharacter);
+    // }
+
+    // Или можно создать отдельный метод для поиска по имени
+
+    const getCharacterByName = async (name) => {
+        const res = await request(`${_apiBase}characters?name=${name}&${_apiKey}`);
         return res.data.results.map(_transformCharacter);
     }
 
@@ -52,7 +70,18 @@ const useMarvelService = () => {
         }
     }
 
-    return {loading, error, clearError, getAllCharacters, getCharacter, getAllComics, getComic}
+    return {
+        // loading,
+        // error,
+        clearError,
+        process,
+        setProcess,
+        getAllCharacters,
+        getCharacterByName,
+        getCharacter,
+        getAllComics,
+        getComic
+    }
 }
 
 export default useMarvelService;
